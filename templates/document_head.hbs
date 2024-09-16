@@ -1,0 +1,78 @@
+<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+<!-- Make the translated search clear button label available for use in JS -->
+<!-- See buildClearSearchButton() in script.js -->
+<script type="text/javascript">window.searchClearButtonLabelLocalized = "{{t 'search_clear'}}";</script>
+<script type="importmap">
+{
+  "imports": {
+    "new-request-form": "{{asset 'new-request-form-bundle.js'}}",
+    "flash-notifications": "{{asset 'flash-notifications-bundle.js'}}",
+    "new-request-form-translations": "{{asset 'new-request-form-translations-bundle.js'}}",
+    "shared": "{{asset 'shared-bundle.js'}}",
+    "wysiwyg": "{{asset 'wysiwyg-bundle.js'}}"
+  }
+}
+</script>
+<script type="module">
+  import { renderFlashNotifications } from "flash-notifications";
+
+  const settings = {{json settings}};
+  const closeLabel = {{json (t 'close')}}
+
+  renderFlashNotifications(settings, closeLabel);
+</script>
+<!-- Smooth redirect from specific Zendesk page to main website -->
+<script>
+(function() {
+  // Function to get URL parameters
+  function getUrlParameter(name) {
+    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+    var results = regex.exec(location.search);
+    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+  }
+
+  // Check if we're on the specific return page
+  var isReturnPage = window.location.href.startsWith("https://swrailway.zendesk.com/hc/en-gb") && 
+                     getUrlParameter('return_to') === '/hc/requests';
+
+  if (isReturnPage) {
+    console.log('On the return page, redirecting to custom confirmation page...');
+    // Replace this URL with the actual URL of your custom confirmation article
+    var confirmationPageUrl = "https://www.southwesternrailway.com/";
+    
+    // Redirect to the custom confirmation page
+    window.location.href = confirmationPageUrl;
+  } else {
+    console.log('Not on the return page, no redirection needed.');
+  }
+
+  // For debugging: log current URL and return_to parameter
+  console.log('Current URL:', window.location.href);
+  console.log('return_to parameter:', getUrlParameter('return_to'));
+})();
+</script>
+
+<script>
+   import axios from 'axios';
+
+  const serveRequest = async (reference) => {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+  
+      const { data } = axios.post(
+          `${process.env.DATAGUARD_URL}/v1/access-tokens/tokens`,
+          {
+              applicationId: process.env.DATAGUARD_APP_ID,
+              externalRef: reference,
+              expiryDate: tomorrow.toISOString(),
+          },
+          {
+              headers: {
+                  'X-API-Key': process.env.DATAGUARD_API_KEY,
+              }
+          }
+      );
+  
+      return data.token;
+</script>
